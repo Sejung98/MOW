@@ -1,0 +1,11 @@
+{
+  "font_family": "맑은 고딕",
+  "font_size": 11,
+  "background": "#f4f5f7",
+  "surface": "#ffffff",
+  "accent": "#2563eb",
+  "accent_text": "#ffffff",
+  "border_color": "#d1d5db",
+  "text_color": "#111827",
+  "tree_stripe": "#f8fafc"
+}
