@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>재고 관리</h2>
+
+    <!-- 제품 추가 폼 -->
+    <form method="POST" action="{{ url_for('add_product') }}">
+        <h3>새 제품 추가</h3>
+        <div class="flex">
+            <div class="form-group" style="flex: 1;">
+                <label for="product_code">제품 코드</label>
+                <input type="text" id="product_code" name="product_code" required>
+            </div>
+            <div class="form-group" style="flex: 2;">
+                <label for="name">제품명</label>
+                <input type="text" id="name" name="name" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="cost">원가</label>
+                <input type="number" id="cost" name="cost" step="0.01" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="price">판매가</label>
+                <input type="number" id="price" name="price" step="0.01" required>
+            </div>
+        </div>
+        <div class="flex">
+            <div class="form-group" style="flex: 1;">
+                <label for="stock">초기 재고</label>
+                <input type="number" id="stock" name="stock" min="0" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="reorder_level">재주문 기준</label>
+                <input type="number" id="reorder_level" name="reorder_level" min="0" value="5" required>
+            </div>
+            <div class="form-group" style="flex: auto;">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn">제품 추가</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- 재고 추가 폼 -->
+    <form method="POST" action="{{ url_for('restock') }}" style="margin-top: 2rem;">
+        <h3>재고 추가</h3>
+        <div class="flex">
+            <div class="form-group" style="flex: 1;">
+                <label for="restock_code">제품 코드</label>
+                <input type="text" id="restock_code" name="product_code" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="quantity">추가 수량</label>
+                <input type="number" id="quantity" name="quantity" min="1" required>
+            </div>
+            <div class="form-group" style="flex: auto;">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn">재고 추가</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div class="card">
+    <h3>제품 목록</h3>
+    {% if low_stock %}
+    <div class="alert alert-error">
+        <strong>주의:</strong> 다음 제품들의 재고가 부족합니다:
+        {{ low_stock | join(', ', attribute='name') }}
+    </div>
+    {% endif %}
+
+    <table>
+        <thead>
+            <tr>
+                <th>코드</th>
+                <th>제품명</th>
+                <th>원가</th>
+                <th>판매가</th>
+                <th>재고</th>
+                <th>재주문 기준</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for product in products %}
+            <tr>
+                <td>{{ product.product_code }}</td>
+                <td>{{ product.name }}</td>
+                <td>₩{{ "%.2f"|format(product.cost) }}</td>
+                <td>₩{{ "%.2f"|format(product.price) }}</td>
+                <td {% if product.stock <= product.reorder_level %}style="color: red; font-weight: bold;"{% endif %}>
+                    {{ product.stock }}
+                </td>
+                <td>{{ product.reorder_level }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

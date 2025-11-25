@@ -442,7 +442,7 @@ class DatabaseManager:
             cur = conn.cursor()
             cur.execute(
                 """
-                SELECT strftime('%Y-%m', s.sale_date) AS period,
+                SELECT substr(s.sale_date, 1, 7) AS period,
                        SUM(s.quantity * s.sale_price) AS revenue,
                        SUM(s.quantity * p.cost) AS cogs
                 FROM sales s

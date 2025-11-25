@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>🎉 환영합니다</h2>
+    <p>MOW 재고 및 재무 관리 시스템에 오신 것을 환영합니다.</p>
+    <p>이 시스템을 사용하여 제품 재고 관리, 판매 기록, 재무 보고서를 효율적으로 관리할 수 있습니다.</p>
+
+    <div style="margin-top: 2rem;">
+        <a href="{{ url_for('generate_dummy_data') }}" class="btn btn-secondary" style="margin-right: 1rem;">
+            📊 더미 데이터 생성
+        </a>
+        <span style="color: #666; font-size: 0.9rem;">테스트용 샘플 데이터를 자동으로 추가합니다</span>
+    </div>
+</div>
+
+<div class="stats">
+    <div class="stat-card">
+        <h4>📦 등록된 제품</h4>
+        <div class="stat-value" id="product-count">-</div>
+        <div class="stat-subtitle">개의 상품이 등록됨</div>
+    </div>
+    <div class="stat-card">
+        <h4>💰 총 재고 가치</h4>
+        <div class="stat-value" id="inventory-value">-</div>
+        <div class="stat-subtitle">원 상당의 재고</div>
+    </div>
+    <div class="stat-card">
+        <h4>💵 현금 잔액</h4>
+        <div class="stat-value" id="cash-balance">-</div>
+        <div class="stat-subtitle">원 보유 중</div>
+    </div>
+    <div class="stat-card">
+        <h4>📈 이번 달 수익</h4>
+        <div class="stat-value" id="monthly-revenue">-</div>
+        <div class="stat-subtitle">원 매출 달성</div>
+    </div>
+</div>
+
+<script>
+// 로딩 애니메이션
+function showLoading(element) {
+    element.innerHTML = '<div style="display: inline-block; width: 20px; height: 20px; border: 2px solid #667eea; border-radius: 50%; border-top-color: transparent; animation: spin 1s linear infinite;"></div>';
+}
+
+function hideLoading(element, content) {
+    element.innerHTML = content;
+}
+
+// 숫자 카운트 애니메이션
+function animateNumber(element, targetValue, suffix = '', prefix = '') {
+    const startValue = 0;
+    const duration = 1000;
+    const startTime = performance.now();
+
+    function update(currentTime) {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+
+        // 이징 함수 (ease-out)
+        const easeOutProgress = 1 - Math.pow(1 - progress, 3);
+
+        const currentValue = Math.floor(startValue + (targetValue - startValue) * easeOutProgress);
+        element.textContent = prefix + currentValue.toLocaleString() + suffix;
+
+        if (progress < 1) {
+            requestAnimationFrame(update);
+        }
+    }
+
+    requestAnimationFrame(update);
+}
+
+async function loadStats() {
+    const statElements = {
+        'product-count': { loading: true, suffix: '개' },
+        'inventory-value': { loading: true, prefix: '₩', suffix: '원' },
+        'cash-balance': { loading: true, prefix: '₩', suffix: '원' },
+        'monthly-revenue': { loading: true, prefix: '₩', suffix: '원' }
+    };
+
+    // 로딩 표시
+    Object.keys(statElements).forEach(id => {
+        const element = document.getElementById(id);
+        if (statElements[id].loading) {
+            showLoading(element);
+        }
+    });
+
+    try {
+        const [productsRes, salesRes] = await Promise.all([
+            fetch('/api/products'),
+            fetch('/api/sales')
+        ]);
+
+        const products = await productsRes.json();
+        const sales = await salesRes.json();
+
+        // 제품 수 업데이트
+        animateNumber(document.getElementById('product-count'), products.length, '개');
+
+        // 재고 가치 계산
+        const inventoryValue = products.reduce((sum, p) => sum + (p.stock * p.cost), 0);
+        animateNumber(document.getElementById('inventory-value'), inventoryValue, '원', '₩');
+
+        // 이번 달 판매 계산
+        const now = new Date();
+        const currentMonth = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        const monthlySales = sales.filter(s => s.sale_date.startsWith(currentMonth));
+        const monthlyRevenue = monthlySales.reduce((sum, s) => sum + (s.quantity * s.sale_price), 0);
+        animateNumber(document.getElementById('monthly-revenue'), monthlyRevenue, '원', '₩');
+
+        // 현금 잔액 (간단한 계산 - 실제로는 더 복잡한 로직 필요)
+        const cashBalance = monthlyRevenue * 0.8; // 매출의 80%를 현금으로 가정
+        animateNumber(document.getElementById('cash-balance'), cashBalance, '원', '₩');
+
+    } catch (error) {
+        console.error('통계 로드 실패:', error);
+        // 에러 시 기본값 표시
+        Object.keys(statElements).forEach(id => {
+            const element = document.getElementById(id);
+            element.textContent = '오류';
+        });
+    }
+}
+
+// CSS 애니메이션 추가
+const style = document.createElement('style');
+style.textContent = `
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.stat-card {
+    animation: fadeInUp 0.6s ease-out forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.stat-card:nth-child(1) { animation-delay: 0.1s; }
+.stat-card:nth-child(2) { animation-delay: 0.2s; }
+.stat-card:nth-child(3) { animation-delay: 0.3s; }
+.stat-card:nth-child(4) { animation-delay: 0.4s; }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+`;
+document.head.appendChild(style);
+
+// 페이지 로드 시 통계 로드
+document.addEventListener('DOMContentLoaded', loadStats);
+</script>
+{% endblock %}

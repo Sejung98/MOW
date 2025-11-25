@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>세금 설정</h2>
+
+    <form method="POST" action="{{ url_for('update_taxes') }}">
+        <h3>세금율 설정</h3>
+        <div class="flex">
+            <div class="form-group" style="flex: 1;">
+                <label for="vat_rate">부가가치세율 (%)</label>
+                <input type="number" id="vat_rate" name="vat_rate" step="0.01" value="{{ "%.2f"|format(rates.vat_rate * 100) }}" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="income_tax_rate">소득세율 (%)</label>
+                <input type="number" id="income_tax_rate" name="income_tax_rate" step="0.01" value="{{ "%.2f"|format(rates.income_tax_rate * 100) }}" required>
+            </div>
+            <div class="form-group" style="flex: auto;">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn">세금율 업데이트</button>
+            </div>
+        </div>
+    </form>
+
+    <div style="margin-top: 2rem;">
+        <h4>현재 세금율</h4>
+        <ul>
+            <li><strong>부가가치세율:</strong> {{ "%.1f"|format(rates.vat_rate * 100) }}%</li>
+            <li><strong>소득세율:</strong> {{ "%.1f"|format(rates.income_tax_rate * 100) }}%</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

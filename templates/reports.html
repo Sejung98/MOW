@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card">
+    <h2>재무 보고서</h2>
+
+    <!-- 보고서 생성 폼 -->
+    <form method="POST" action="{{ url_for('generate_report') }}">
+        <h3>월별 보고서 생성</h3>
+        <div class="flex">
+            <div class="form-group" style="flex: 1;">
+                <label for="year">년도</label>
+                <input type="number" id="year" name="year" value="{{ year }}" min="2020" max="2030" required>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label for="month">월</label>
+                <input type="number" id="month" name="month" value="{{ month }}" min="1" max="12" required>
+            </div>
+            <div class="form-group" style="flex: auto;">
+                <label>&nbsp;</label>
+                <button type="submit" class="btn">보고서 생성</button>
+            </div>
+        </div>
+    </form>
+</div>
+
+{% if summary %}
+<div class="card">
+    <h3>{{ year }}년 {{ month }}월 재무 요약</h3>
+
+    <div class="stats">
+        <div class="stat-card">
+            <h4>수익</h4>
+            <div class="stat-value">₩{{ "%.0f"|format(summary.revenue) }}</div>
+        </div>
+        <div class="stat-card">
+            <h4>매출 원가</h4>
+            <div class="stat-value">₩{{ "%.0f"|format(summary.cogs) }}</div>
+        </div>
+        <div class="stat-card">
+            <h4>총 이익</h4>
+            <div class="stat-value">₩{{ "%.0f"|format(summary.gross_profit) }}</div>
+        </div>
+        <div class="stat-card">
+            <h4>순이익</h4>
+            <div class="stat-value">₩{{ "%.0f"|format(summary.net_income) }}</div>
+        </div>
+    </div>
+
+    <h4>상세 내역</h4>
+    <table>
+        <tbody>
+            <tr>
+                <td><strong>수익 (Revenue)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.revenue) }}</td>
+            </tr>
+            <tr>
+                <td><strong>매출 원가 (COGS)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.cogs) }}</td>
+            </tr>
+            <tr>
+                <td><strong>총 이익 (Gross Profit)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.gross_profit) }}</td>
+            </tr>
+            <tr>
+                <td><strong>부가가치세 (VAT)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.vat) }}</td>
+            </tr>
+            <tr>
+                <td><strong>소득세 (Income Tax)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.income_tax) }}</td>
+            </tr>
+            <tr>
+                <td><strong>순이익 (Net Income)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.net_income) }}</td>
+            </tr>
+            <tr>
+                <td><strong>구매액 (Purchases)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.purchases) }}</td>
+            </tr>
+            <tr>
+                <td><strong>현금 흐름 (Cash Flow)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.cash_flow) }}</td>
+            </tr>
+            <tr>
+                <td><strong>재고 가치 (Inventory Value)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.inventory_value) }}</td>
+            </tr>
+            <tr>
+                <td><strong>현금 잔액 (Cash Balance)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.cash_balance) }}</td>
+            </tr>
+            <tr>
+                <td><strong>총 자산 (Assets)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.assets) }}</td>
+            </tr>
+            <tr>
+                <td><strong>부채 (Liabilities)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.liabilities) }}</td>
+            </tr>
+            <tr>
+                <td><strong>자본 (Equity)</strong></td>
+                <td>₩{{ "%.2f"|format(summary.equity) }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endif %}
+{% endblock %}
